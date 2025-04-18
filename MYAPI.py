@@ -1,66 +1,68 @@
-from fastapi import FastAPI, Path
-from pydantic import BaseModel
-from typing import Optional
-from fastapi import Query
+from fastapi import FastAPI
+import requests
 
-app = FastAPI(title="My API", description="This API does cool stuff", version="1.0.0")
-
-students = {1: {"name": "los_pipitas", "age": 245, "year": "12BC"}}
+app = FastAPI()
 
 
-class Student(BaseModel):
-    name: str
-    age: int
-    year: str
+@app.get("/Driver/{driver_number}")
+def get_driver_live(driver_number: int):
+    endpoints = {
+        "laps": f"https://api.openf1.org/v1/laps?driver_number={driver_number}&session_key=latest",
+        "pit": f"https://api.openf1.org/v1/pit?driver_number={driver_number}&session_key=latest",
+        "position": f"https://api.openf1.org/v1/position?driver_number={driver_number}&meeting_key=latest",
+        "stint": f"https://api.openf1.org/v1/stints?driver_number={driver_number}&session_key=latest",
+        "radio": f"https://api.openf1.org/v1/team_radio?driver_number={driver_number}&session_key=latest",
+    }
+    results = {}
+    for key, url in endpoints.items():
+        response = requests.get(url)
+        if response.status_code == 200:
+            results[key] = response.json()
+        else:
+            results[key] = {"error": f"Failed to fetch {key} data"}
+
+    return results
 
 
-class UpdateStudent(BaseModel):
-    name: Optional[str] = None
-    age: Optional[int] = None
-    year: Optional[str] = None
+@app.get("/Teams/{Team_name}")
+def get_teams(Team_name: str):
+    endpoints = {}
 
 
-@app.get("/")
-async def root():
-    return {"message": "Hello World!"}
+@app.get("/Circuit/{Circuit_name}")
+def get_circuit(Circuit_name: str):
+    endpoints = {}
 
 
-@app.get("/get-student/{student_id}")
-async def get_student_id(
-    student_id: int = Path(description="the student ID", gt=0, it=3)
-):
-    return students[student_id]
+@app.get("/Ranking/Driver")
+def get_ranking_live():
+    endpoints = {
+        "position": "https://api.openf1.org/v1/position?meeting_key=latest",
+    }
+    results = {}
+    for key, url in endpoints.items():
+        response = requests.get(url)
+        if response.status_code == 200:
+            results[key] = response.json()
+        else:
+            results[key] = {"error": f"Failed to fetch {key} data"}
+
+    return results
 
 
-@app.get("/get-by-name")
-def get_student_name(name: str = Query(default=None, max_length=50)):
-    for student_id in students:
-        if students[student_id]["name"] == name:
-            return students[student_id]
-    return {"Data": "Not found"}
+@app.get("/Live")
+def get_main():
+    endpoints = {
+        "race_control": "https://api.openf1.org/v1/race_control?session_key=latest",
+        "sessions": "https://api.openf1.org/v1/sessions?session_key=latest",
+        "weather": "https://api.openf1.org/v1/weather?meeting_key=latest",
+    }
+    results = {}
+    for key, url in endpoints.items():
+        response = requests.get(url)
+        if response.status_code == 200:
+            results[key] = response.json()
+        else:
+            results[key] = {"error": f"Failed to fetch {key} data"}
 
-
-@app.post("/create-student/{student_id}")
-def create_student(student_id: int, student: Student):
-    if student_id in students:
-        return {"Error": "Student already exists."}
-
-    students[student_id] = student
-    return students[student_id]
-
-
-@app.put("/update-student/{student_id}")
-def update_student(student_id: int, student: UpdateStudent):
-    if student_id not in students:
-        return {"Error": "Student does not exist"}
-
-    if student.name is not None:
-        students[student_id]["name"] = student.name
-
-    if student.age is not None:
-        students[student_id]["age"] = student.age
-
-    if student.year is not None:
-        students[student_id]["year"] = student.year
-
-    return students[student_id]
+    return results
