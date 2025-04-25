@@ -34,11 +34,9 @@ def get_circuit(Circuit_name: str):
     endpoints = {}
 
 
-@app.get("/Ranking/Driver")
+@app.get("/Ranking/Driver/{}")
 def get_ranking_live():
-    endpoints = {
-        "position": "https://api.openf1.org/v1/position?meeting_key=latest",
-    }
+    endpoints = {}
     results = {}
     for key, url in endpoints.items():
         response = requests.get(url)
