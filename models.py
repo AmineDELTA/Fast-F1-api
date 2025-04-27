@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Float
-from .database import Base
+from .database import Base, engine
 
 
 class Driver(Base):

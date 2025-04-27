@@ -1,12 +1,32 @@
-from fastapi import FastAPI
+from typing import Annotated
+from fastapi import FastAPI, Depends
+from database import create_table
+from models import Driver, TeamRank, Teams, DriverRank, Circuit
+from sqlalchemy.orm import Session
+from database import SessionLocal
 import requests
 
 
 app = FastAPI()
+create_table()
+
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+SessionDependency = Annotated[Session, Depends(get_db)]
 
 
 @app.get("/Driver/{driver_number}")
-def get_driver_live(driver_number: int):
+def get_driver_live(driver_number: int, db: SessionDependency):
+    driver = db.query(Driver).filter(Driver.number == driver_number).first()
+    if not driver:
+        return {"error": "Driver not found in database"}
     endpoints = {
         "laps": f"https://api.openf1.org/v1/laps?driver_number={driver_number}&session_key=latest",
         "pit": f"https://api.openf1.org/v1/pit?driver_number={driver_number}&session_key=latest",
@@ -22,7 +42,16 @@ def get_driver_live(driver_number: int):
         else:
             results[key] = {"error": f"Failed to fetch {key} data"}
 
-    return results
+    return {
+        "driver_info": {
+            "name": driver.name,
+            "number": driver.number,
+            "nationality": driver.nationality,
+            "age": driver.age,
+            "team_id": driver.team_name_id,  # should we add also the team table ? or link it maybe
+        },
+        "live_info": results,
+    }
 
 
 @app.get("/Teams/{Team_name}")
