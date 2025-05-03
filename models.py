@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Float
+from sqlalchemy.orm import relationship
 from .database import Base, engine
 
 
@@ -16,12 +17,10 @@ class Teams(Base):
     __tablename__ = "teams"
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
-    team_principal = Column(String)
-    car_model = Column(String)
-    base = Column(String)
     drivers = Column(Integer)
     victories = Column(Integer)
-    podiums = Column(Integer)
+    championships = Column(Integer)
+    drivers = relationship("Drivers", backref="Team")
 
 
 class Circuit(Base):
@@ -45,6 +44,8 @@ class DriverRank(Base):
     team_id = Column(Integer, ForeignKey("teams.id"))
     points = Column(Integer)
     position = Column(Integer)
+
+    driver = relationship("Driver", backref="DriverRank")
 
 
 class TeamRank(Base):
