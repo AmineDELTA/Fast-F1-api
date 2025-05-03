@@ -95,7 +95,7 @@ def get_circuit(Circuit_id: int, db: SessionDependency):
 
 
 @app.get("/Ranking/Drivers")
-def get_ranking_live(db: SessionDependency):
+def get_ranking_driver(db: SessionDependency):
     driver_ranks = db.query(DriverRank).order_by(DriverRank.position.asc()).all()
     if not driver_ranks:
         return {"error": "No driver ranking data found"}
@@ -118,7 +118,7 @@ def get_ranking_live(db: SessionDependency):
 
 
 @app.get("/Ranking/Teams")
-def get_ranking_live(db: SessionDependency):
+def get_ranking_team(db: SessionDependency):
     team_ranks = db.query(TeamRank).order_by(TeamRank.position.asc()).all()
     if not team_ranks:
         return {"error": "No team ranking data found"}
