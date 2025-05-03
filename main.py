@@ -71,7 +71,7 @@ def get_teams(Team_id: int, db: SessionDependency):
             }
         )
     return {
-        "name": Team.off_name,
+        "name": Team.name,
         "victories": Team.victories,
         "championships": Team.championships,
         "drivers": Team.Drivers,
@@ -112,8 +112,6 @@ def get_ranking_live(db: SessionDependency):
                 "team_id": driver.team_name_id,
                 "position": rank.position,
                 "points": rank.points,
-                "victories": rank.victories,
-                "podiums": rank.podiums,
             }
         )
     return result
@@ -132,11 +130,9 @@ def get_ranking_live(db: SessionDependency):
             continue
         result.append(
             {
-                "team_name": team.off_name,
+                "team_name": team.name,
                 "position": rank.position,
                 "points": rank.points,
-                "victories": rank.victories,
-                "podiums": rank.podiums,
             }
         )
     return result

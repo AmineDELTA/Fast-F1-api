@@ -55,3 +55,5 @@ class TeamRank(Base):
     team_name_id = Column(Integer, ForeignKey("teams.id"))
     points = Column(Integer)
     position = Column(Integer)
+
+    team = relationship("Team", backref="TeamRank")
