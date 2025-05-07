@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from models import Driver, Teams, Circuit, TeamRank, DriverRank
 
 
-def get_driver_by_number(db: Session, number: int):
+def get_driver(db: Session, number: int):
     return db.query(Driver).filter(Driver.number == number).first()
 
 
@@ -13,15 +13,19 @@ def create_driver(db: Session, driver: Driver):
     return driver
 
 
-def get_driver_rank(db: Session, number: int):
+def get_UNdriver_rank(db: Session, number: int):
     driver_w = db.query(Driver).filter(Driver.number == number).first()
     if not driver_w:
         return None
     return db.query(DriverRank).filter(DriverRank.driver_id == driver_w.id).first()
 
 
-def get_team_by_name(db: Session, name: str):
-    return db.query(Teams).filter(Teams.name == name).first()
+def get_driver_ranks(db: Session):
+    return db.query(DriverRank).order_by(DriverRank.position.asc()).all()
+
+
+def get_team(db: Session, id: int):
+    return db.query(Teams).filter(Teams.id == id).first()
 
 
 def create_team(db: Session, team: Teams):
@@ -31,15 +35,19 @@ def create_team(db: Session, team: Teams):
     return team
 
 
-def get_team_rank(db: Session, name: str):
+def get_UNteam_rank(db: Session, name: str):
     team = db.query(Teams).filter(Teams.name == name).first()
     if not team:
         return None
     return db.query(TeamRank).filter(TeamRank.team_name_id == team.id).first()
 
 
-def get_circuit_by_name(db: Session, name: str):
-    return db.query(Circuit).filter(Circuit.name == name).first()
+def get_team_ranks(db: Session):
+    return db.query(TeamRank).order_by(TeamRank.position.asc()).all()
+
+
+def get_circuit(db: Session, id: int):
+    return db.query(Circuit).filter(Circuit.id == id).first()
 
 
 def create_circuit(db: Session, circuit: Circuit):

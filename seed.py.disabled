@@ -1,0 +1,77 @@
+from sqlalchemy.orm import Session
+from database import SessionLocal
+from models import Team, Driver, DriverRank, TeamRank
+
+
+def add_rankings():
+    db = SessionLocal()
+
+    try:
+        # 1. Get existing teams and drivers
+        ferrari = db.query(Team).filter(Team.name.ilike("%ferrari%")).first()
+        mclaren = db.query(Team).filter(Team.name.ilike("%mclaren%")).first()
+
+        # Get drivers by their unique last names
+        hamilton = db.query(Driver).filter(Driver.last_name == "Hamilton").first()
+        norris = db.query(Driver).filter(Driver.last_name == "Norris").first()
+        piastri = db.query(Driver).filter(Driver.last_name == "Piastri").first()
+
+        # 2. Create driver rankings (using both driver and team relationships)
+        driver_rankings = [
+            DriverRank(
+                position=1, points=380, driver_id=hamilton.id, team_id=ferrari.id
+            ),
+            DriverRank(position=2, points=275, driver_id=norris.id, team_id=mclaren.id),
+            DriverRank(
+                position=3, points=190, driver_id=piastri.id, team_id=mclaren.id
+            ),
+        ]
+
+        # 3. Create team rankings
+        team_rankings = [
+            TeamRank(
+                position=1,
+                points=650,  # Sum of team's driver points
+                team_id=ferrari.id,
+            ),
+            TeamRank(
+                position=2,
+                points=465,  # Sum of team's driver points
+                team_id=mclaren.id,
+            ),
+        ]
+
+        # 4. Add and commit
+        db.add_all(driver_rankings + team_rankings)
+        db.commit()
+
+        # Print results
+        print("Successfully added rankings:\n")
+
+        print("Driver Rankings:")
+        print(f"1. {hamilton.first_name} {hamilton.last_name} - 380 pts (Ferrari)")
+        print(f"2. {norris.first_name} {norris.last_name} - 275 pts (McLaren)")
+        print(f"3. {piastri.first_name} {piastri.last_name} - 190 pts (McLaren)")
+
+        print("\nTeam Rankings:")
+        print(f"1. Ferrari - 650 pts")
+        print(f"2. McLaren - 465 pts")
+
+    except Exception as e:
+        db.rollback()
+        print(f"Error adding rankings: {e}")
+        raise
+    finally:
+        db.close()
+
+
+if __name__ == "__main__":
+    add_rankings()
+if __name__ == "__main__":
+    # db = SessionLocal()
+    # team1 = ...
+    # driver1 = ...
+    # db.add_all([...])
+    # db.commit()
+    # db.close()
+    pass  # temporarily disables execution

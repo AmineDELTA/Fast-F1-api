@@ -5,6 +5,13 @@ from models import Driver, TeamRank, Teams, DriverRank, Circuit
 from sqlalchemy.orm import Session
 from database import SessionLocal
 import requests
+from .crud import (
+    get_team,
+    get_driver,
+    get_circuit,
+    get_driver_ranks,
+    get_team_ranks,
+)
 
 
 app = FastAPI()
@@ -22,17 +29,17 @@ def get_db():
 SessionDependency = Annotated[Session, Depends(get_db)]
 
 
-@app.get("/Driver/{driver_number}")
-def get_driver_live(driver_number: int, db: SessionDependency):
-    driver = db.query(Driver).filter(Driver.number == driver_number).first()
+@app.get("/Driver/{number}")
+def get_driver_route(number: int, db: SessionDependency):
+    driver = get_driver(db, number)
     if not driver:
         return {"error": "Driver not found in database"}
     endpoints = {
-        "laps": f"https://api.openf1.org/v1/laps?driver_number={driver_number}&session_key=latest",
-        "pit": f"https://api.openf1.org/v1/pit?driver_number={driver_number}&session_key=latest",
-        "position": f"https://api.openf1.org/v1/position?driver_number={driver_number}&meeting_key=latest",
-        "stint": f"https://api.openf1.org/v1/stints?driver_number={driver_number}&session_key=latest",
-        "radio": f"https://api.openf1.org/v1/team_radio?driver_number={driver_number}&session_key=latest",
+        "laps": f"https://api.openf1.org/v1/laps?driver_number={number}&session_key=latest",
+        "pit": f"https://api.openf1.org/v1/pit?driver_number={number}&session_key=latest",
+        "position": f"https://api.openf1.org/v1/position?driver_number={number}&meeting_key=latest",
+        "stint": f"https://api.openf1.org/v1/stints?driver_number={number}&session_key=latest",
+        "radio": f"https://api.openf1.org/v1/team_radio?driver_number={number}&session_key=latest",
     }
     results = {}
     for key, url in endpoints.items():
@@ -44,7 +51,7 @@ def get_driver_live(driver_number: int, db: SessionDependency):
 
     return {
         "driver_info": {
-            "name": driver.name,
+            "name": f"{driver.first_name} {driver.last_name}",
             "number": driver.number,
             "nationality": driver.nationality,
             "age": driver.age,
@@ -54,9 +61,9 @@ def get_driver_live(driver_number: int, db: SessionDependency):
     }
 
 
-@app.get("/Teams/{Team_name}")
-def get_teams(Team_id: int, db: SessionDependency):
-    Team = db.query(Teams).filter(Teams.id == Team_id).first()
+@app.get("/Teams/{id}")
+def get_team_route(id: int, db: SessionDependency):
+    Team = get_team(db, id)
     if not Team:
         return {"error": "Team not found in database"}
 
@@ -64,7 +71,8 @@ def get_teams(Team_id: int, db: SessionDependency):
     for driver in Team.drivers:
         driver_list.append(
             {
-                "name": driver.name,
+                "first_name": driver.first_name,
+                "last_name": driver.last_name,
                 "number": driver.number,
                 "age": driver.age,
                 "nationality": driver.nationality,
@@ -74,13 +82,13 @@ def get_teams(Team_id: int, db: SessionDependency):
         "name": Team.name,
         "victories": Team.victories,
         "championships": Team.championships,
-        "drivers": Team.Drivers,
+        "drivers": driver_list,
     }
 
 
-@app.get("/Circuit/{Circuit_name}")
-def get_circuit(Circuit_id: int, db: SessionDependency):
-    circuit = db.query(Circuit).filter(Circuit.id == Circuit_id).first()
+@app.get("/Circuit/{id}")
+def get_circuit_route(id: int, db: SessionDependency):
+    circuit = get_circuit(db, id)
     if not circuit:
         return {"error": "circuit not found in database"}
     return {
@@ -95,8 +103,8 @@ def get_circuit(Circuit_id: int, db: SessionDependency):
 
 
 @app.get("/Ranking/Drivers")
-def get_ranking_driver(db: SessionDependency):
-    driver_ranks = db.query(DriverRank).order_by(DriverRank.position.asc()).all()
+def get_driver_rank_route(db: SessionDependency):
+    driver_ranks = get_driver_ranks(db)
     if not driver_ranks:
         return {"error": "No driver ranking data found"}
 
@@ -107,7 +115,7 @@ def get_ranking_driver(db: SessionDependency):
             continue
         result.append(
             {
-                "driver_name": driver.name,
+                "driver_name": f"{driver.first_name} {driver.last_name}",
                 "driver_number": driver.number,
                 "team_id": driver.team_name_id,
                 "position": rank.position,
@@ -118,8 +126,8 @@ def get_ranking_driver(db: SessionDependency):
 
 
 @app.get("/Ranking/Teams")
-def get_ranking_team(db: SessionDependency):
-    team_ranks = db.query(TeamRank).order_by(TeamRank.position.asc()).all()
+def get_team_rank_route(db: SessionDependency):
+    team_ranks = get_team_ranks(db)
     if not team_ranks:
         return {"error": "No team ranking data found"}
 
@@ -139,7 +147,7 @@ def get_ranking_team(db: SessionDependency):
 
 
 @app.get("/Live")
-def get_main():
+def get_live():
     endpoints = {
         "race_control": "https://api.openf1.org/v1/race_control?session_key=latest",
         "sessions": "https://api.openf1.org/v1/sessions?session_key=latest",
