@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from models import Driver, Teams, Circuit, TeamRank, DriverRank
+from models import Driver, Team, Circuit, TeamRank, DriverRank
 
 
 def get_driver(db: Session, number: int):
@@ -13,7 +13,7 @@ def create_driver(db: Session, driver: Driver):
     return driver
 
 
-def get_UNdriver_rank(db: Session, number: int):
+def get_UNIdriver_rank(db: Session, number: int):
     driver_w = db.query(Driver).filter(Driver.number == number).first()
     if not driver_w:
         return None
@@ -25,21 +25,21 @@ def get_driver_ranks(db: Session):
 
 
 def get_team(db: Session, id: int):
-    return db.query(Teams).filter(Teams.id == id).first()
+    return db.query(Team).filter(Team.id == id).first()
 
 
-def create_team(db: Session, team: Teams):
-    db.add(team)
+def create_team(db: Session, Team: Team):
+    db.add(Team)
     db.commit()
-    db.refresh(team)
-    return team
+    db.refresh(Team)
+    return Team
 
 
-def get_UNteam_rank(db: Session, name: str):
-    team = db.query(Teams).filter(Teams.name == name).first()
-    if not team:
+def get_UNIteam_rank(db: Session, name: str):
+    Team = db.query(Team).filter(Team.name == name).first()
+    if not Team:
         return None
-    return db.query(TeamRank).filter(TeamRank.team_name_id == team.id).first()
+    return db.query(TeamRank).filter(TeamRank.team_name_id == Team.id).first()
 
 
 def get_team_ranks(db: Session):
