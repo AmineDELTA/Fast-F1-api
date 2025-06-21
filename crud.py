@@ -24,6 +24,28 @@ def get_driver_ranks(db: Session):
     return db.query(DriverRank).order_by(DriverRank.position.asc()).all()
 
 
+def get_all_drivers(db: Session):
+    return db.query(Driver).all()
+
+
+def update_driver(db: Session, driver_id: int, updates: dict):
+    driver = db.query(Driver).filter(Driver.id == driver_id).first()
+    if driver:
+        for key, value in updates.items():
+            setattr(driver, key, value)
+        db.commit()
+        db.refresh(driver)
+    return driver
+
+
+def delete_driver(db: Session, driver_id: int):
+    driver = db.query(Driver).filter(Driver.id == driver_id).first()
+    if driver:
+        db.delete(driver)
+        db.commit()
+    return driver
+    
+    
 def get_team(db: Session, id: int):
     return db.query(Team).filter(Team.id == id).first()
 
@@ -36,8 +58,8 @@ def create_team(db: Session, Team: Team):
 
 
 def get_UNIteam_rank(db: Session, name: str):
-    Team = db.query(Team).filter(Team.name == name).first()
-    if not Team:
+    team = db.query(Team).filter(Team.name == name).first()
+    if not team:
         return None
     return db.query(TeamRank).filter(TeamRank.team_name_id == Team.id).first()
 
@@ -55,3 +77,21 @@ def create_circuit(db: Session, circuit: Circuit):
     db.commit()
     db.refresh(circuit)
     return circuit
+
+
+def delete_team(db: Session, team_id: int):
+    team = db.query(Team).filter(Team.id == team_id).first()
+    if team:
+        db.delete(team)
+        db.commit()
+    return team
+    
+
+def update_team(db: Session, team_id: int, updates: dict):
+    team = db.query(Team).filter(Team.id == team_id).first()
+    if team:
+        for key, value in updates.items():
+            setattr(team, key, value)
+        db.commit()
+        db.refresh(team)
+    return team

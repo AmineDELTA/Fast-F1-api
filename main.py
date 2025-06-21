@@ -5,13 +5,16 @@ from models import Driver, TeamRank, Team, DriverRank, Circuit
 from sqlalchemy.orm import Session
 from database import SessionLocal
 import requests
-from schemas import DriverCreate, DriverOut, TeamCreate, TeamOut
+from schemas import DriverCreate, DriverOut, TeamCreate, TeamOut, TeamUpdate
 from crud import (
     get_team,
     get_driver,
     get_circuit,
     get_driver_ranks,
     get_team_ranks,
+    get_driver_rank_by_number,
+    get_team_rank_by_name,
+    update_team,
 )
 
 app = FastAPI()
@@ -34,10 +37,10 @@ def read_root():
     return {"message": "Welcome to the F1 API!"}
 
 
-@app.get("/Driver/{number}")
+@app.get("/drivers/{number}")
 def get_driver_route(number: int, db: SessionDependency):
     driver = get_driver(db, number)
-    if not driver:  # could i take this out? check later
+    if not driver:  # can i take this out? check later
         raise HTTPException(status_code=404, detail="driver not found")
     endpoints = {
         # "laps": f"https://api.openf1.org/v1/laps?driver_number={number}&session_key=latest",
@@ -68,7 +71,7 @@ def get_driver_route(number: int, db: SessionDependency):
     }
 
 
-@app.post("/Driver/Create", response_model=DriverOut)
+@app.post("/drivers/create", response_model=DriverOut)
 def create_driver(driver: DriverCreate, db: SessionDependency):
     existing_driver = db.query(Driver).filter(Driver.number == driver.number).first()
     if existing_driver:
@@ -81,8 +84,7 @@ def create_driver(driver: DriverCreate, db: SessionDependency):
         db.query(Driver)
         .filter(
             Driver.first_name.ilike(driver.first_name),
-            Driver.last_name.ilike(driver.last_name),
-        )
+            )
         .first()
     ):
         raise HTTPException(status_code=400, detail="Driver name already exists")
@@ -112,7 +114,7 @@ def create_driver(driver: DriverCreate, db: SessionDependency):
     return db_driver
 
 
-@app.get("/Teams/{id}")
+@app.get("/teams/{id}")
 def get_team_route(id: int, db: SessionDependency):
     Team = get_team(db, id)
     if not Team:
@@ -137,14 +139,21 @@ def get_team_route(id: int, db: SessionDependency):
     }
 
 
-@app.post("/Teams/create", response_model=TeamOut)
+@app.get("/rankings/teams/{name}")
+def get_team_ranking(name: str, db: SessionDependency):
+    rank = get_team_rank_by_name(db, name)
+    if not rank:
+        raise HTTPException(status_code=404, detail="Team ranking not found")
+    return rank
+
+
+@app.post("/teams/create", response_model=TeamOut)
 def create_team(team: TeamCreate, db: Session = Depends(get_db)):
-    # Check if team name already exists
+
     existing_team = db.query(Team).filter(Team.name == team.name).first()
     if existing_team:
         raise HTTPException(status_code=400, detail="Team name already exists")
 
-    # Create new team in DB
     db_team = Team(
         name=team.name, victories=team.victories, championships=team.championships
     )
@@ -156,7 +165,7 @@ def create_team(team: TeamCreate, db: Session = Depends(get_db)):
     return db_team
 
 
-@app.get("/Circuit/{id}")
+@app.get("/Circuits/{id}")
 def get_circuit_route(id: int, db: SessionDependency):
     circuit = get_circuit(db, id)
     if not circuit:
@@ -172,8 +181,8 @@ def get_circuit_route(id: int, db: SessionDependency):
     }
 
 
-@app.get("/Ranking/Drivers")
-def get_driver_rank_route(db: SessionDependency):
+@app.get("/rankings/drivers")
+def get_drivers_ranks_route(db: SessionDependency):
     driver_ranks = get_driver_ranks(db)
     if not driver_ranks:
         raise HTTPException(status_code=404, detail="driver ranks not found")
@@ -195,8 +204,16 @@ def get_driver_rank_route(db: SessionDependency):
     return result
 
 
-@app.get("/Ranking/Teams")
-def get_team_rank_route(db: SessionDependency):
+@app.get("/rankings/drivers/{number}")
+def get_driver_ranking(number: int, db: SessionDependency):
+    rank = get_driver_rank_by_number(db, number)
+    if not rank:
+        raise HTTPException(status_code=404, detail="Driver ranking not found")
+    return rank
+
+
+@app.get("/rankings/teams")
+def get_teams_ranks_route(db: SessionDependency):
     team_ranks = get_team_ranks(db)
     if not team_ranks:
         raise HTTPException(status_code=404, detail="team ranks not found")
@@ -216,7 +233,15 @@ def get_team_rank_route(db: SessionDependency):
     return result
 
 
-@app.get("/Live")
+@app.patch("/teams/{team_id}")
+def update_team_route(team_id: int, updates: TeamUpdate, db: SessionDependency):
+    team = update_team(db, team_id, updates)
+    if not team:
+        raise HTTPException(status_code=404, detail="Team not found")
+    return team
+
+
+@app.get("/live")
 def get_live():
     endpoints = {
         "race_control": "https://api.openf1.org/v1/race_control?session_key=latest",
