@@ -19,9 +19,9 @@ class Driver(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     team_name_id = Column(Integer, ForeignKey("teams.id"))
-    first_name = Column(String, nullable=False, unique=True)
-    last_name = Column(String, nullable=False, unique=True)
-    number = Column(Integer, unique=True)
+    first_name = Column(String, nullable=False)
+    last_name = Column(String, nullable=False)
+    number = Column(Integer, unique=True, nullable=False)
     age = Column(Integer, nullable=False)
     nationality = Column(String)
 
@@ -32,11 +32,11 @@ class Circuit(Base):
     __tablename__ = "circuits"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String)
-    location = Column(String)
+    name = Column(String, nullable=False)
+    location = Column(String, nullable=False)
     length = Column(Float)
-    laps = Column(Integer)
-    lap_record = Column(Integer)
+    laps = Column(Integer, nullable=False)
+    lap_record = Column(Integer) #In seconds
     race_distance = Column(Float)
     num_corners = Column(Integer)
 

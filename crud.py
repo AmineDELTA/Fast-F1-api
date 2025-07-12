@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from models import Driver, Team, Circuit, TeamRank, DriverRank
 
-
+#idk if i'm gonna use all of them
 def get_driver(db: Session, number: int):
     return db.query(Driver).filter(Driver.number == number).first()
 
@@ -13,11 +13,11 @@ def create_driver(db: Session, driver: Driver):
     return driver
 
 
-def get_UNIdriver_rank(db: Session, number: int):
-    driver_w = db.query(Driver).filter(Driver.number == number).first()
-    if not driver_w:
+def get_driver_rank(db: Session, number: int):
+    driver_UNI = db.query(Driver).filter(Driver.number == number).first()
+    if not driver_UNI:
         return None
-    return db.query(DriverRank).filter(DriverRank.driver_id == driver_w.id).first()
+    return db.query(DriverRank).filter(DriverRank.driver_id == driver_UNI.id).first()
 
 
 def get_driver_ranks(db: Session):
@@ -28,8 +28,8 @@ def get_all_drivers(db: Session):
     return db.query(Driver).all()
 
 
-def update_driver(db: Session, driver_id: int, updates: dict):
-    driver = db.query(Driver).filter(Driver.id == driver_id).first()
+def update_driver(db: Session, number: int, updates: dict):
+    driver = db.query(Driver).filter(Driver.number == number).first()
     if driver:
         for key, value in updates.items():
             setattr(driver, key, value)
@@ -38,8 +38,8 @@ def update_driver(db: Session, driver_id: int, updates: dict):
     return driver
 
 
-def delete_driver(db: Session, driver_id: int):
-    driver = db.query(Driver).filter(Driver.id == driver_id).first()
+def delete_driver(db: Session, number: int):
+    driver = db.query(Driver).filter(Driver.number == number).first()
     if driver:
         db.delete(driver)
         db.commit()
@@ -57,11 +57,11 @@ def create_team(db: Session, Team: Team):
     return Team
 
 
-def get_UNIteam_rank(db: Session, name: str):
+def get_team_rank(db: Session, name: str):
     team = db.query(Team).filter(Team.name == name).first()
     if not team:
         return None
-    return db.query(TeamRank).filter(TeamRank.team_name_id == Team.id).first()
+    return db.query(TeamRank).filter(TeamRank.team_id == team.id).first()
 
 
 def get_team_ranks(db: Session):

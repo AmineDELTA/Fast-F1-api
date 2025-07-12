@@ -1,11 +1,8 @@
 from pydantic import BaseModel, Field
 from typing import Optional
 from pydantic import field_validator
-from database import SessionLocal
-from models import Team
  
 class DriverBase(BaseModel):
-    #Matches the Driver model
 
     first_name: str = Field(..., min_length=2)
     last_name: str = Field(..., min_length=2)
@@ -16,8 +13,7 @@ class DriverBase(BaseModel):
 
 
 class DriverCreate(DriverBase):
-    # Check nationality length
-    @field_validator("nationality")
+    @field_validator("nationality")#this field validator thing still confuses me
     def validate_nationality(cls, value: str) -> str:
         if len(value) > 50:
             raise ValueError("Nationality must be ≤ 50 chars")
@@ -40,11 +36,9 @@ class DriverOut(DriverBase):
 
 
 class TeamBase(BaseModel):
-    #Shared fields for all Team schemas
-
-    name: str = Field(..., max_length=50, example="Mercedes")
-    victories: int
-    championships: int = Field(0, ge=0)
+    name: str = Field(..., example="Mercedes")
+    victories: int = Field(..., example=124)
+    championships: int = Field(..., example=8)
 
 
 class TeamCreate(TeamBase):
