@@ -53,7 +53,7 @@ class TeamUpdate(BaseModel):
 class RankingOut(BaseModel):
     position: int
     points: int
-    wins: Optional[int] = None
+    #wins: Optional[int] = None
 
 class DriverRankingOut(RankingOut):
     driver_name: str

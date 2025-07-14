@@ -6,10 +6,15 @@ from sqlalchemy.orm import sessionmaker
 from database import Base
 from models import Driver, Team
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"  # update later on
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
+TEST_DATABASE_URL = "sqlite:///./test.db" 
+engine = create_engine(TEST_DATABASE_URL, connect_args={"check_same_thread": False})
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+@pytest.fixture(scope="session", autouse=True)
+def setup_database():
+    Base.metadata.create_all(bind=engine)
+    yield
+    Base.metadata.drop_all(bind=engine)
 
 @pytest.fixture
 def db_session():
@@ -20,7 +25,6 @@ def db_session():
     finally:
         db.close()
         Base.metadata.drop_all(bind=engine)
-
 
 @pytest.fixture
 def client(db_session):
@@ -43,14 +47,7 @@ def test_team(db_session):
 
 @pytest.fixture
 def test_driver(db_session, test_team):
-    driver = Driver(
-        first_name="Lewis",
-        last_name="Hamilton",
-        number=44,
-        age=38,
-        nationality="British",
-        team_name_id=test_team.id
-    )
+    driver = Driver(first_name="Lewis", last_name="Hamilton", number=44, age=38, nationality="British", team_name_id=test_team.id)
     db_session.add(driver)
     db_session.commit()
     return driver
