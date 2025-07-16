@@ -1,4 +1,4 @@
-# 🏎️ Fastf1-api - Learning Project
+# 🏎️ Fast-F1-api - Learning Project
 
 A **FastAPI-based REST API** for managing Formula 1 drivers, teams, and rankings. Built as a learning project to explore modern Python backend development.
 
