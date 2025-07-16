@@ -22,7 +22,7 @@ def get_db():
         db.close()
 
 
-SessionDependency = Annotated[Session, Depends(get_db)] #every time i check this i foget how it works
+SessionDependency = Annotated[Session, Depends(get_db)] #this is pretty nice
 
 
 @app.get("/") #idk if i should delete this thing
@@ -77,10 +77,10 @@ def create_driver_route(driver: DriverCreate, db: SessionDependency):
         )
     team_id = None
     if driver.team_name:
-        teamm = db.query(Team).filter(Team.name.ilike(driver.team_name)).first()
-        if not teamm:
+        team = db.query(Team).filter(Team.name.ilike(driver.team_name)).first()  # CHANGE: teamm → team
+        if not team:
             raise HTTPException(status_code=404, detail=f"Team '{driver.team_name}' not found")
-        team_id = teamm.id
+        team_id = team.id  # CHANGE: teamm.id → team.id
 
     db_driver = Driver(
         first_name=driver.first_name,
@@ -95,22 +95,22 @@ def create_driver_route(driver: DriverCreate, db: SessionDependency):
 
 @app.get("/drivers")
 def get_all_drivers_route(db: SessionDependency):
-    les_drivers = db.query(Driver).all()
+    all_drivers = db.query(Driver).all()  # CHANGE: les_drivers → all_drivers
     return[{
         "number": d.number,
         "name": f"{d.first_name} {d.last_name}",
         "team_id": d.team_name_id
-    } for d in les_drivers]
+    } for d in all_drivers]  # CHANGE: les_drivers → all_drivers
 
 
 @app.get("/teams/{id}")
 def get_team_route(id: int, db: SessionDependency):
-    Team = get_team(db, id)
-    if not Team:
+    team = get_team(db, id)
+    if not team:
         raise HTTPException(status_code=404, detail="team not found")
 
     driver_list = []
-    for driver in Team.drivers:
+    for driver in team.drivers:
         driver_list.append(
             {
                 "first_name": driver.first_name,
@@ -121,9 +121,9 @@ def get_team_route(id: int, db: SessionDependency):
             }
         )
     return{
-        "name": Team.name,
-        "victories": Team.victories,
-        "championships": Team.championships,
+        "name": team.name,
+        "victories": team.victories,
+        "championships": team.championships,
         "drivers": driver_list,
     }
 

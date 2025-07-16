@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from models import Driver, Team, Circuit, TeamRank, DriverRank
+from schemas import TeamUpdate  # ✅ This import is already here, but check it's correct
 
 #idk if i'm gonna use all of them
 def get_driver(db: Session, number: int):
@@ -50,11 +51,11 @@ def get_team(db: Session, id: int):
     return db.query(Team).filter(Team.id == id).first()
 
 
-def create_team(db: Session, Team: Team):
-    db.add(Team)
+def create_team(db: Session, team: Team):
+    db.add(team)
     db.commit()
-    db.refresh(Team)
-    return Team
+    db.refresh(team)
+    return team
 
 
 def get_team_rank(db: Session, name: str):
@@ -87,11 +88,17 @@ def delete_team(db: Session, team_id: int):
     return team
     
 
-def update_team(db: Session, team_id: int, updates: dict):
+def update_team(db: Session, team_id: int, updates: TeamUpdate):
     team = db.query(Team).filter(Team.id == team_id).first()
-    if team:
-        for key, value in updates.items():
-            setattr(team, key, value)
-        db.commit()
-        db.refresh(team)
+    if not team:
+        return None
+    
+    # Convert Pydantic model to dict, excluding unset fields
+    update_dict = updates.model_dump(exclude_unset=True)
+    
+    for key, value in update_dict.items():  # Now this works
+        setattr(team, key, value)
+    
+    db.commit()
+    db.refresh(team)
     return team

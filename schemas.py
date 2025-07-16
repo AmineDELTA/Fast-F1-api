@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional
 from pydantic import field_validator
  
@@ -13,7 +13,7 @@ class DriverBase(BaseModel):
 
 
 class DriverCreate(DriverBase):
-    @field_validator("nationality")#this field validator thing still confuses me
+    @field_validator("nationality")
     def validate_nationality(cls, value: str) -> str:
         if len(value) > 50:
             raise ValueError("Nationality must be ≤ 50 chars")
@@ -28,15 +28,22 @@ class DriverUpdate(BaseModel):
     nationality: Optional[str] = None
 
 
-class DriverOut(DriverBase):
-    id: int
-    team_id: Optional[int] = Field(None, description = "Linked team ID for API lookups", example=1)
-    class Config:
-        from_attributes = True
+class RankingOut(BaseModel):
+    position: int
+    points: int
 
+class DriverRankingOut(RankingOut):
+    driver_name: str
+    driver_number: int
+    team: Optional[str]
+
+class TeamRankingOut(RankingOut):
+    team_name: str = Field(..., description="Official team name")
+    drivers: list[str] = Field(..., description="List of driver full names")
+    
 
 class TeamBase(BaseModel):
-    name: str = Field(..., example="Mercedes")
+    name: str = Field(..., description="Official team name", json_schema_extra={"example": "Mercedes"})
     victories: int = Field(..., example=124)
     championships: int = Field(..., example=8)
 
@@ -50,23 +57,10 @@ class TeamUpdate(BaseModel):
     victories: Optional[int] = Field(None, ge=0)
     championships: Optional[int] = Field(None, ge=0)
 
-class RankingOut(BaseModel):
-    position: int
-    points: int
-    #wins: Optional[int] = None
-
-class DriverRankingOut(RankingOut):
-    driver_name: str
-    driver_number: int
-    team: Optional[str]
-
-class TeamRankingOut(RankingOut):
-    team_name: str = Field(..., description="Official team name")
-    drivers: list[str] = Field(..., description="List of driver full names")
-    
-
 class TeamOut(TeamBase):
     id: int
+    model_config = ConfigDict(from_attributes=True)
 
-    class Config:
-        from_attributes = True
+class DriverOut(DriverBase):
+    id: int
+    model_config = ConfigDict(from_attributes=True)

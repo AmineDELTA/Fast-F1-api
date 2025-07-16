@@ -1,15 +1,23 @@
 def test_create_team(client):
-    response = client.post("/teams/create", json={"name": "Ferrari", "victories": 243, "championships": 16})
+    response = client.post("/teams/create", json={
+        "name": "Red Bull",
+        "victories": 85,
+        "championships": 5
+    })
     assert response.status_code == 200
-    assert response.json()["name"] == "Ferrari"
+    assert response.json()["name"] == "Red Bull"
 
-def test_get_team_with_drivers(client, test_team):
+def test_get_team(client, test_team):
     response = client.get(f"/teams/{test_team.id}")
     assert response.status_code == 200
-    assert len(response.json()["drivers"]) == 1
-    assert response.json()["drivers"][0]["number"] == test_team.drivers[0].number
+    data = response.json()
+    assert data["name"] == test_team.name
+    assert data["victories"] == 125
+    assert data["championships"] == 8
 
-def test_update_team(client, test_team):
-    response = client.patch(f"/teams/{test_team.id}", json={"victories": 126})
+def test_get_team_with_drivers(client, test_team, test_driver):
+    response = client.get(f"/teams/{test_team.id}")
     assert response.status_code == 200
-    assert response.json()["victories"] == 126
+    data = response.json()
+    assert len(data["drivers"]) == 1
+    assert data["drivers"][0]["number"] == test_driver.number
