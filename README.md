@@ -2,11 +2,11 @@
 
 A **FastAPI-based REST API** for managing Formula 1 drivers, teams, and rankings. Built as a learning project to explore modern Python backend development.
 
-> **Note:** Some architectural choices prioritize learning over production best practices.
+> **Note:** Some architectural choices prioritize learning over best practices.
 
 ## 🛠️ Tech Stack
 
-| Component | Technology |
+|           |            |
 |-----------|------------|
 | **Web Framework** | FastAPI 0.115.12 |
 | **Database** | PostgreSQL + SQLAlchemy 2.0.40 |
