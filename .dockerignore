@@ -1,0 +1,8 @@
+.git
+.env
+.gitignore
+__pycache__/
+venv
+.pytest_cache
+seed.py.disabled
+.env.local

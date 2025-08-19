@@ -4,8 +4,8 @@ from dotenv import load_dotenv
 
 import os
 
-
-load_dotenv()
+env_file= ".env.local" if os.path.exists(".env.local") else ".env"
+load_dotenv(env_file)
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:

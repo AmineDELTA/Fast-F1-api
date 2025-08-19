@@ -2,3 +2,5 @@ __pycache__/
 .env
 venv
 seed.py.disabled
+.env.local
+.pytest_cache

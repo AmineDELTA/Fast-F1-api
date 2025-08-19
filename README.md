@@ -6,15 +6,15 @@ A **FastAPI-based REST API** for managing Formula 1 drivers, teams, and rankings
 
 ## 🛠️ Tech Stack
 
-|           |            |
-|-----------|------------|
-| **Web Framework** | FastAPI 0.115.12 |
-| **Database** | PostgreSQL + SQLAlchemy 2.0.40 |
-| **Validation** | Pydantic 2.11.3 |
-| **Testing** | pytest 8.3.5 + httpx |
-| **Server** | Uvicorn (ASGI) |
-| **Environment** | python-dotenv |
-
+|                      |                                |
+| -------------------- | ------------------------------ |
+| **Web Framework**    | FastAPI 0.115.12               |
+| **Database**         | PostgreSQL + SQLAlchemy 2.0.40 |
+| **Validation**       | Pydantic 2.11.3                |
+| **Testing**          | pytest 8.3.5 + httpx           |
+| **Server**           | Uvicorn (ASGI)                 |
+| **Environment**      | python-dotenv                  |
+| **Containerization** | Docker + Docker Compose        |
 
 ## 🏗️ Project Structure
 
@@ -27,6 +27,10 @@ F1_API/
 ├── database.py          # Database connection and session management
 ├── rate_limit.py        # Rate limiting middleware
 ├── requirements.txt     # Python dependencies
+├── Dockerfile           # Container build instructions
+├── docker-compose.yml   # Multi-container orchestration
+├── .dockerignore        # Docker build context exclusions
+├── .env.example         # Environment variables template
 ├── .env                 # Environment variables (not in repo)
 └── test/
     ├── conftest.py      # pytest fixtures and test configuration
@@ -34,49 +38,109 @@ F1_API/
     ├── test_teams.py    # Team endpoint tests
     └── test_rankings.py # Rankings endpoint tests
 ```
+
 ## 🚀 Features
 
 ### **Driver Management**
+
 - ✅ Create new drivers with validation
 - ✅ Get driver by number
 - ✅ List all drivers
 - ✅ Associate drivers with teams
 
 ### **Team Management**
+
 - ✅ Create teams with statistics
 - ✅ Get team information
 - ✅ List team drivers
 - ✅ Track victories and championships
 
 ### **Rankings System**
+
 - ✅ Driver championship rankings
 - ✅ Team championship standings
 - ✅ Points-based ranking system
 
 ### **Additional Features**
+
 - ✅ Rate limiting middleware
 - ✅ Comprehensive test suite
 - ✅ Data validation with Pydantic
 - ✅ PostgreSQL database integration
 - ✅ Environment-based configuration
+- ✅ Docker containerization
+- ✅ Hot reload development
+
+## 🐳 Quick Start with Docker
+
+### **Prerequisites**
+
+- Docker and Docker Compose installed
+
+### **1. Clone and Setup**
+
+```bash
+git clone https://github.com/AmineDELTA/F1_API.git
+cd F1_API
+```
+
+### **2. Configure Environment**
+
+```bash
+# Copy environment template
+cp .env.example .env
+
+# Edit .env with your database credentials
+# DATABASE_URL=postgresql://postgres:your_password@db:5432/F1_data
+# POSTGRES_USER=postgres
+# POSTGRES_PASSWORD=your_password
+# POSTGRES_DB=F1_data
+```
+
+### **3. Run with Docker**
+
+```bash
+# Start the full application stack
+docker-compose up --build
+
+# Or run in background
+docker-compose up --build -d
+```
+
+### **4. Access the Application**
+
+- **API Documentation:** http://localhost:8000/docs
+- **API Root:** http://localhost:8000
+- **Database:** localhost:5432
+
+### **5. Create Test Data**
+
+Use the Swagger UI at http://localhost:8000/docs to:
+
+1. Create teams using `POST /teams/create`
+2. Create drivers using `POST /drivers/create`
+3. Test endpoints like `GET /drivers/{number}`
 
 ## 🎓 Learning Notes
 
 ### **What I Learned:**
 
 1. **FastAPI Fundamentals**
+
    - Route definitions and path parameters
    - Request/response models with Pydantic
    - Dependency injection system
    - Automatic API documentation
 
 2. **Database Integration**
+
    - SQLAlchemy ORM relationships
    - Database session management
    - Migration patterns
    - Query optimization
 
 3. **Testing Best Practices**
+
    - Test isolation with database transactions
    - Fixture design and dependency injection
    - HTTP client testing with TestClient
@@ -88,49 +152,6 @@ F1_API/
    - Data validation and serialization
    - Rate limiting and middleware
 
-## 📦 Installation & Setup
+## 👤 Author
 
-### **1. Clone the Repository**
-```bash
-git clone https://github.com/AmineDELTA/F1_API.git
-cd F1_API
-```
-
-### **2. Create Virtual Environment**
-```bash
-python -m venv venv
-venv\Scripts\activate  # Windows
-# source venv/bin/activate  # Linux/Mac
-```
-
-### **3. Install Dependencies**
-```bash
-pip install -r requirements.txt
-```
-
-### **4. Database Setup**
-```bash
-# Create PostgreSQL database
-createdb f1_api_db
-
-# Set up environment variables
-echo "DATABASE_URL=postgresql://username:password@localhost:5432/f1_api_db" > .env
-```
-
-### **5. Initialize Database**
-```bash
-python -c "from database import engine; from models import Base; Base.metadata.create_all(engine)"
-```
-
-### **6. Run the Application**
-```bash
-uvicorn main:app --reload
-```
-
-Visit: `http://localhost:8000/docs` for interactive API documentation
-
-
-
-**Amine DELTA** - [GitHub Profile](https://github.com/AmineDELTA) - [LinkedIn Profile](www.linkedin.com/in/mohamed-amine-el-gueddar-312a2b26a)
-
-Project Link: [https://github.com/AmineDELTA/F1_API](https://github.com/AmineDELTA/F1_API)
+**AmineDELTA** - [GitHub Profile](https://github.com/AmineDELTA)

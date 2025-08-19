@@ -77,7 +77,7 @@ def create_driver_route(driver: DriverCreate, db: SessionDependency):
         )
     team_id = None
     if driver.team_name:
-        team = db.query(Team).filter(Team.name.ilike(driver.team_name)).first()  # CHANGE: teamm → team
+        team = db.query(Team).filter(Team.name.ilike(driver.team_name)).first()
         if not team:
             raise HTTPException(status_code=404, detail=f"Team '{driver.team_name}' not found")
         team_id = team.id  # CHANGE: teamm.id → team.id
